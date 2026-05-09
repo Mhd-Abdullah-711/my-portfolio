@@ -959,23 +959,7 @@
       WEB3FORMS_ACCESS_KEY === 'YOUR_WEB3FORMS_ACCESS_KEY' ||
       WEB3FORMS_ACCESS_KEY.trim() === '';
     if (keyUnset) {
-      var gurl = gmailComposeDraftUrl(payload);
-      window.open(gurl, '_blank', 'noopener,noreferrer');
-      msg.className = 'form-msg success';
-      msg.style.removeProperty('display');
-      msg.textContent = '';
-      var line = document.createElement('p');
-      line.style.margin = '0 0 10px';
-      line.textContent =
-        'If a new Gmail tab opened, press Send there. If your browser blocked the popup, use the link below. Optional: paste a Web3Forms Access Key in this HTML file so this button sends without opening Gmail.';
-      var link = document.createElement('a');
-      link.href = gurl;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      link.textContent = 'Open Gmail with this message';
-      link.style.cssText = 'color:#166534;font-weight:700;text-decoration:underline;';
-      msg.appendChild(line);
-      msg.appendChild(link);
+      window.open(gmailComposeDraftUrl(payload), '_blank', 'noopener,noreferrer');
       return;
     }
 
