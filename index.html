@@ -911,12 +911,27 @@
   const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';
   const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';
   const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';
+  const CONTACT_EMAIL       = 'mhd.abdullah.y@gmail.com';
 
   (function() {
     if (EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY') {
       emailjs.init(EMAILJS_PUBLIC_KEY);
     }
   })();
+
+  function openMailtoFallback(params) {
+    const subject = `New Inquiry: ${params.project_type || 'Website Contact Form'}`;
+    const body = [
+      `Name: ${params.from_name}`,
+      `Email: ${params.reply_to}`,
+      `Project Type: ${params.project_type || 'Not specified'}`,
+      '',
+      'Message:',
+      params.message
+    ].join('\n');
+    const mailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailto;
+  }
 
   function sendEmail(e) {
     e.preventDefault();
@@ -925,22 +940,27 @@
     msg.className = 'form-msg';
     msg.style.display = 'none';
 
-    if (EMAILJS_PUBLIC_KEY === 'YOUR_PUBLIC_KEY') {
-      msg.textContent = 'Please configure EmailJS keys in the script to enable form submissions. See setup instructions in the code comments.';
-      msg.className = 'form-msg error';
-      return;
-    }
-
-    btn.disabled = true;
-    btn.textContent = 'Sending...';
-
     const params = {
       from_name:    document.getElementById('from_name').value,
       reply_to:     document.getElementById('reply_to').value,
       project_type: document.getElementById('project_type').value,
       message:      document.getElementById('message').value,
-      to_email:     'mhd.abdullah.y@gmail.com'
+      to_email:     CONTACT_EMAIL
     };
+
+    if (
+      EMAILJS_PUBLIC_KEY === 'YOUR_PUBLIC_KEY' ||
+      EMAILJS_SERVICE_ID === 'YOUR_SERVICE_ID' ||
+      EMAILJS_TEMPLATE_ID === 'YOUR_TEMPLATE_ID'
+    ) {
+      openMailtoFallback(params);
+      msg.textContent = 'Email app opened with your message pre-filled. Please press send in your email app.';
+      msg.className = 'form-msg success';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
 
     emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params)
       .then(() => {
