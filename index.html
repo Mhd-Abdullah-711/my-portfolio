@@ -904,9 +904,30 @@
   window.addEventListener('load',   fixProcessLine);
   window.addEventListener('resize', fixProcessLine);
 
-  // Contact form — Web3Forms posts to their API and emails you (no desktop mail app needed).
-  // Get a free Access Key: https://web3forms.com — register with your inbox email, paste key below.
+  // Contact form — works in two modes:
+  //  (A) Web3Forms key below = sends from the page silently to your inbox. Get key free: https://web3forms.com
+  //      Replace YOUR_WEB3FORMS_ACCESS_KEY with the Access Key copy-pasted from the Web3Forms dashboard.
+  //  (B) If the key is still the placeholder above, we open Gmail with your draft pre-filled instead.
   const WEB3FORMS_ACCESS_KEY = 'YOUR_WEB3FORMS_ACCESS_KEY';
+  const CONTACT_INBOX_EMAIL   = 'mhd.abdullah.y@gmail.com';
+
+  function gmailComposeDraftUrl(payload) {
+    var subject = '[Portfolio] ' + (payload.project_type || 'New message');
+    var body =
+      'Name: ' + payload.from_name + '\n' +
+      'Reply email: ' + payload.reply_to + '\n' +
+      'Project type: ' + (payload.project_type || 'Not specified') + '\n\n' +
+      'Message:\n' +
+      payload.message;
+    var q = new URLSearchParams({
+      view: 'cm',
+      fs: '1',
+      to: CONTACT_INBOX_EMAIL,
+      su: subject,
+      body: body
+    });
+    return 'https://mail.google.com/mail/?' + q.toString();
+  }
 
   function resetSubmitButton(btn) {
     btn.disabled = false;
@@ -934,12 +955,27 @@
       message:      document.getElementById('message').value.trim()
     };
 
-    if (WEB3FORMS_ACCESS_KEY === 'YOUR_WEB3FORMS_ACCESS_KEY' || !WEB3FORMS_ACCESS_KEY) {
-      showFormFeedback(
-        msg,
-        'error',
-        'Add your Web3Forms Access Key in index.html (search for YOUR_WEB3FORMS_ACCESS_KEY). Free setup: https://web3forms.com — use your Gmail address when registering so submissions arrive there.'
-      );
+    var keyUnset =
+      WEB3FORMS_ACCESS_KEY === 'YOUR_WEB3FORMS_ACCESS_KEY' ||
+      WEB3FORMS_ACCESS_KEY.trim() === '';
+    if (keyUnset) {
+      var gurl = gmailComposeDraftUrl(payload);
+      window.open(gurl, '_blank', 'noopener,noreferrer');
+      msg.className = 'form-msg success';
+      msg.style.removeProperty('display');
+      msg.textContent = '';
+      var line = document.createElement('p');
+      line.style.margin = '0 0 10px';
+      line.textContent =
+        'If a new Gmail tab opened, press Send there. If your browser blocked the popup, use the link below. Optional: paste a Web3Forms Access Key in this HTML file so this button sends without opening Gmail.';
+      var link = document.createElement('a');
+      link.href = gurl;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.textContent = 'Open Gmail with this message';
+      link.style.cssText = 'color:#166534;font-weight:700;text-decoration:underline;';
+      msg.appendChild(line);
+      msg.appendChild(link);
       return;
     }
 
