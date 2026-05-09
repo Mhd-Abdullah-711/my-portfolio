@@ -8,9 +8,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=Cormorant+Garamond:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
-  <!-- EmailJS -->
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-
   <style>
     :root {
       --orange:      #E07A3A;
@@ -777,7 +774,7 @@
       <h2 class="sec-title reveal rd1">Let's build something<br><em>worth clicking.</em></h2>
       <p class="sec-sub reveal rd2">Whether you are launching a new product or an existing listing is not performing, I would love to hear about it.</p>
       <div class="channels">
-        <a href="mailto:mhd.abdullah.y@gmail.com" class="ch reveal">
+        <a href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=mhd.abdullah.y%40gmail.com&amp;su=Portfolio%20contact" class="ch reveal" target="_blank" rel="noopener noreferrer" title="Opens Gmail in your browser — works even without a desktop email app">
           <div class="ch-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></div>
           <div><div class="ch-lbl">Email</div><div class="ch-val">mhd.abdullah.y@gmail.com</div></div>
           <div class="ch-arr"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
@@ -799,7 +796,7 @@
       </div>
     </div>
 
-    <!-- Contact Form using EmailJS -->
+    <!-- Contact Form: Web3Forms — add your Access Key in the script below (web3forms.com) -->
     <div class="cont-form reveal rd1">
       <div class="form-title">Send a Message</div>
       <form id="contactForm" onsubmit="sendEmail(event)">
@@ -907,122 +904,80 @@
   window.addEventListener('load',   fixProcessLine);
   window.addEventListener('resize', fixProcessLine);
 
-  // EmailJS Contact Form
-  const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';
-  const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';
-  const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';
-  const CONTACT_EMAIL       = 'mhd.abdullah.y@gmail.com';
+  // Contact form — Web3Forms posts to their API and emails you (no desktop mail app needed).
+  // Get a free Access Key: https://web3forms.com — register with your inbox email, paste key below.
+  const WEB3FORMS_ACCESS_KEY = 'YOUR_WEB3FORMS_ACCESS_KEY';
 
-  (function() {
-    if (EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY') {
-      emailjs.init(EMAILJS_PUBLIC_KEY);
-    }
-  })();
-
-  function buildMailtoHref(params) {
-    const subject = `New Inquiry: ${params.project_type || 'Website Contact Form'}`;
-    const body = [
-      `Name: ${params.from_name}`,
-      `Email: ${params.reply_to}`,
-      `Project Type: ${params.project_type || 'Not specified'}`,
-      '',
-      'Message:',
-      params.message
-    ].join('\n');
-    return `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  function resetSubmitButton(btn) {
+    btn.disabled = false;
+    btn.innerHTML = 'Send Message <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
   }
 
-  function showFormMsg(el, type, contentNode) {
+  function showFormFeedback(el, type, text) {
+    el.textContent = text;
     el.className = 'form-msg ' + type;
     el.style.removeProperty('display');
-    el.textContent = '';
-    el.appendChild(contentNode);
   }
 
-  function mailtoFallbackMessage(mailto) {
-    const wrap = document.createDocumentFragment();
-    const line1 = document.createElement('span');
-    line1.textContent = 'If your email app opened, press send there. If nothing opened, ';
-    wrap.appendChild(line1);
-    const linkOpen = document.createElement('a');
-    linkOpen.href = mailto;
-    linkOpen.textContent = 'open this message in your email app';
-    linkOpen.style.cssText = 'color:#166534;font-weight:600;text-decoration:underline;';
-    wrap.appendChild(linkOpen);
-    const line2 = document.createElement('span');
-    line2.textContent = ' or email ';
-    wrap.appendChild(line2);
-    const linkAddr = document.createElement('a');
-    linkAddr.href = 'mailto:' + CONTACT_EMAIL;
-    linkAddr.textContent = CONTACT_EMAIL;
-    linkAddr.style.cssText = 'color:#166534;font-weight:600;text-decoration:underline;';
-    wrap.appendChild(linkAddr);
-    wrap.appendChild(document.createTextNode('.'));
-    return wrap;
-  }
-
-  function sendEmail(e) {
+  async function sendEmail(e) {
     e.preventDefault();
     const btn = document.getElementById('submitBtn');
     const msg = document.getElementById('formMsg');
-    msg.className = 'form-msg';
     msg.textContent = '';
+    msg.className = 'form-msg';
     msg.style.display = 'none';
 
-    const params = {
-      from_name:    document.getElementById('from_name').value,
-      reply_to:     document.getElementById('reply_to').value,
+    const payload = {
+      from_name:    document.getElementById('from_name').value.trim(),
+      reply_to:     document.getElementById('reply_to').value.trim(),
       project_type: document.getElementById('project_type').value,
-      message:      document.getElementById('message').value,
-      to_email:     CONTACT_EMAIL
+      message:      document.getElementById('message').value.trim()
     };
 
-    if (
-      EMAILJS_PUBLIC_KEY === 'YOUR_PUBLIC_KEY' ||
-      EMAILJS_SERVICE_ID === 'YOUR_SERVICE_ID' ||
-      EMAILJS_TEMPLATE_ID === 'YOUR_TEMPLATE_ID'
-    ) {
-      const mailto = buildMailtoHref(params);
-      const wrap = document.createElement('div');
-      wrap.appendChild(mailtoFallbackMessage(mailto));
-      showFormMsg(msg, 'success', wrap);
-      setTimeout(function () {
-        window.location.href = mailto;
-      }, 50);
-      return;
-    }
-
-    if (typeof emailjs === 'undefined') {
-      const mailto = buildMailtoHref(params);
-      const wrap = document.createElement('div');
-      wrap.appendChild(mailtoFallbackMessage(mailto));
-      showFormMsg(msg, 'success', wrap);
-      setTimeout(function () {
-        window.location.href = mailto;
-      }, 50);
+    if (WEB3FORMS_ACCESS_KEY === 'YOUR_WEB3FORMS_ACCESS_KEY' || !WEB3FORMS_ACCESS_KEY) {
+      showFormFeedback(
+        msg,
+        'error',
+        'Add your Web3Forms Access Key in index.html (search for YOUR_WEB3FORMS_ACCESS_KEY). Free setup: https://web3forms.com — use your Gmail address when registering so submissions arrive there.'
+      );
       return;
     }
 
     btn.disabled = true;
     btn.textContent = 'Sending...';
 
-    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params)
-      .then(() => {
-        msg.textContent = 'Message sent! I will get back to you within 24 hours.';
-        msg.className = 'form-msg success';
-        msg.style.removeProperty('display');
-        document.getElementById('contactForm').reset();
-      })
-      .catch(err => {
-        console.error('EmailJS error:', err);
-        msg.textContent = 'Something went wrong. Please email me directly at mhd.abdullah.y@gmail.com';
-        msg.className = 'form-msg error';
-        msg.style.removeProperty('display');
-      })
-      .finally(() => {
-        btn.disabled = false;
-        btn.innerHTML = 'Send Message <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json'
+        },
+        body: JSON.stringify({
+          access_key: WEB3FORMS_ACCESS_KEY,
+          subject: '[Portfolio] ' + (payload.project_type || 'New message'),
+          name: payload.from_name,
+          email: payload.reply_to,
+          message:
+            'Project type: ' + (payload.project_type || 'Not specified') + '\n\n' + payload.message
+        })
       });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.success !== true) {
+        throw new Error(data.message || 'Request failed');
+      }
+      showFormFeedback(msg, 'success', 'Message sent! I will get back to you within 24 hours.');
+      document.getElementById('contactForm').reset();
+    } catch (err) {
+      console.error('Web3Forms error:', err);
+      showFormFeedback(
+        msg,
+        'error',
+        'Could not send right now. Use the Email card (opens Gmail) or WhatsApp, or try again later.'
+      );
+    } finally {
+      resetSubmitButton(btn);
+    }
   }
 </script>
 </body>
